@@ -7,12 +7,26 @@ var generator = new MapGenerator(new MapGeneratorOptions()
 {
     Height = height,
     Width = width,
-    Noise = 0.3f,
+    //Noise = 0.3f,
 });
 
 string[,] map = generator.Generate();
 var visited = new List<Point>();
-GetShortestPath(map, new Point(0, 0), new Point(88, 34));
+
+Console.WriteLine("Write (even; [<=88;<=34]) coordinates, please: ");
+var startAndEnd = Console.ReadLine();
+while (startAndEnd.Length != 0)
+{
+    var startEnd = startAndEnd.Split(" ").ToList();
+    var column1 = Convert.ToInt32(startEnd[0]);
+    var row1 = Convert.ToInt32(startEnd[1]);
+    var column2 = Convert.ToInt32(startEnd[2]);
+    var row2 = Convert.ToInt32(startEnd[3]);
+    GetShortestPath(map, new Point(column1, row1), new Point(column2, row2));
+    Console.WriteLine("Write (even; [<=88;<=34]) coordinates, please: ");
+    startAndEnd = Console.ReadLine();
+}
+
 
 void GetShortestPath(string[,] map, Point start, Point goal)
 {   
