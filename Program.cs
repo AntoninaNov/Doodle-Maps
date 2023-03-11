@@ -7,11 +7,12 @@ var generator = new MapGenerator(new MapGeneratorOptions()
 {
     Height = height,
     Width = width,
+    Noise = 0.3f,
 });
 
 string[,] map = generator.Generate();
 var visited = new List<Point>();
-GetShortestPath(map, new Point(0, 0), new Point(30, 30));
+GetShortestPath(map, new Point(0, 0), new Point(88, 34));
 
 void GetShortestPath(string[,] map, Point start, Point goal)
 {   
