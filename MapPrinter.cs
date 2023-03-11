@@ -7,18 +7,21 @@
     {
         public void Print(string[,] maze, List<Point> path)
         {
+            var star = false;
             PrintTopLine();
             for (var row = 0; row < maze.GetLength(1); row++)
             {
                 Console.Write($"{row}\t");
                 for (var column = 0; column < maze.GetLength(0); column++)
                 {
-                    if (path[0].Row == row && path[0].Column == column)
+                    foreach (var step in path)
                     {
-                        Console.Write("*");
-                        path.Remove(path[0]);
+                        if (step.Row == row && step.Column == column) star = true;
                     }
-                    else Console.Write(maze[column, row]);
+
+                    Console.Write(star ? "*" : maze[column, row]);
+
+                    star = false;
                 }
 
                 Console.WriteLine();

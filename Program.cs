@@ -23,19 +23,19 @@ void GetShortestPath(string[,] map, Point start, Point goal)
     distanceAndOrigin.Add(start, 0, start);
     while (visit.Count != 0)
     {
-        var point = distanceAndOrigin.GetElement();
-        var neighbours = GetNeighbours(point.Key);
+        var (point, number) = distanceAndOrigin.GetElement(visit);
+        var neighbours = GetNeighbours(point);
         foreach (var neighbour in neighbours)
         {
             if (!visited.Contains(neighbour))
             {
                 if (!visit.Contains(neighbour)) visit.Add(neighbour);
-                distanceAndOrigin.Add(neighbour, 1 + point.Value.Item1, point.Key);
+                distanceAndOrigin.Add(neighbour, 1 + number, point);
             }
         }
 
-        visit.Remove(point.Key);
-        visited.Add(point.Key);
+        visit.Remove(point);
+        visited.Add(point);
     }
     visited.Clear();
     var (path, distance) = distanceAndOrigin.WritePath(goal, start);
@@ -46,19 +46,19 @@ void GetShortestPath(string[,] map, Point start, Point goal)
 List<Point> GetNeighbours(Point point)
 {
     var neighbours = new List<Point>();
-    if (point.Row > 0 && map[point.Row, point.Column] != "█")
+    if (point.Row > 0 && map[point.Column, point.Row - 1] != "█")
     {
         neighbours.Add(new Point(point.Column, point.Row - 1));
     }
-    else if (point.Row < height && map[point.Row, point.Column] != "█")
+    if (point.Row < height - 1 && map[point.Column, point.Row + 1] != "█")
     {
         neighbours.Add(new Point(point.Column, point.Row + 1));
     }
-    if (point.Column > 0 && map[point.Row, point.Column] != "█")
+    if (point.Column > 0 && map[point.Column - 1, point.Row] != "█")
     {
         neighbours.Add(new Point(point.Column - 1, point.Row));
     }
-    else if (point.Column < width && map[point.Row, point.Column] != "█")
+    if (point.Column < width - 1 && map[point.Column + 1, point.Row] != "█")
     {
         neighbours.Add(new Point(point.Column + 1, point.Row));
     }
@@ -78,24 +78,25 @@ public class GetMaxStructure
         if (!_points.ContainsKey(element) || _points[element].Item1 > distance) _points[element] = (distance, origin);
     }
 
-    public KeyValuePair<Point, (int, Point)> GetElement()
+    public (Point, int) GetElement(List<Point> toVisit)
     {
         if (_points.Count == 1)
         {
-            return _points.First();
+            return (_points.Keys.First(), _points.Values.First().Item1);
         }
 
-        var min = _points.First();
-        foreach (var point in _points)
+        var min = toVisit[0];
+        var minNum = _points[toVisit[0]].Item1;
+        foreach (var point in toVisit)
         {
-            if (point.Value.Item1 < min.Value.Item1)
+            if (_points[point].Item1 < minNum)
             {
                 min = point;
+                minNum = _points[point].Item1;
             }
         }
 
-        _points.Remove(min.Key);
-        return min;
+        return (min, _points[min].Item1);
     }
 
     public (List<Point>, int) WritePath(Point endPoint, Point start)
