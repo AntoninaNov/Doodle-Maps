@@ -1,132 +1,129 @@
-﻿using Kse.Algorithms.Samples;
+﻿using System.Collections.Generic;
 
-const int height = 35;
-const int width = 90;
-
-var generator = new MapGenerator(new MapGeneratorOptions()
+namespace Kse.Algorithms.Samples
 {
-    Height = height,
-    Width = width,
-    //Noise = 0.3f,
-});
-
-string[,] map = generator.Generate();
-var visited = new List<Point>();
-
-Console.WriteLine("Write (even; [<=88;<=34]) coordinates, please: ");
-var startAndEnd = Console.ReadLine();
-while (startAndEnd.Length != 0)
-{
-    var startEnd = startAndEnd.Split(" ").ToList();
-    var column1 = Convert.ToInt32(startEnd[0]);
-    var row1 = Convert.ToInt32(startEnd[1]);
-    var column2 = Convert.ToInt32(startEnd[2]);
-    var row2 = Convert.ToInt32(startEnd[3]);
-    GetShortestPath(map, new Point(column1, row1), new Point(column2, row2));
-    Console.WriteLine("Write (even; [<=88;<=34]) coordinates, please: ");
-    startAndEnd = Console.ReadLine();
-}
-
-
-void GetShortestPath(string[,] map, Point start, Point goal)
-{   
-    var distanceAndOrigin = new GetMaxStructure();
-    var visit = new List<Point>();
-    var visited = new List<Point>();
-    
-    visit.Add(start);
-    distanceAndOrigin.Add(start, 0, start);
-    while (visit.Count != 0)
+    public class DijkstraAlgorithm
     {
-        var (point, number) = distanceAndOrigin.GetElement(visit);
-        var neighbours = GetNeighbours(point);
-        foreach (var neighbour in neighbours)
+        public static List<Point> GetShortestPath(string[,] mapArray, Point start, Point goal)
         {
-            if (!visited.Contains(neighbour))
+            var shortestPath = new List<Point>();
+            shortestPath.Add(start);
+
+            var distanceFromStart = new Dictionary<Point, int>();
+            distanceFromStart[start] = 0;
+
+            var priorityQueue = new PriorityQueue<Point, int>();
+            priorityQueue.Enqueue(start, 0);
+
+            while (priorityQueue.Count != 0)
             {
-                if (!visit.Contains(neighbour)) visit.Add(neighbour);
-                distanceAndOrigin.Add(neighbour, 1 + number, point);
+                var current = priorityQueue.Dequeue();
+                if (current.Equals(goal))
+                {
+                    break;
+                }
+
+                var neighborPoints = GetNeighbours(mapArray, current);
+                foreach (var next in neighborPoints)
+                {
+                    var n = int.Parse(mapArray[next.Column, next.Row]);
+                    var newDistance = distanceFromStart[current] + n;
+
+                    if (!distanceFromStart.ContainsKey(next) || newDistance < distanceFromStart[next])
+                    {
+                        distanceFromStart[next] = newDistance;
+                        var priority = newDistance;
+                        priorityQueue.Enqueue(next, priority);
+                    }
+                }
+            }
+
+            var currentNode = goal;
+            while (!currentNode.Equals(start))
+            {
+                shortestPath.Add(currentNode);
+                var minDistance = int.MaxValue;
+                Point next = GetNeighbours(mapArray, currentNode).FirstOrDefault();
+
+                foreach (var neighbour in GetNeighbours(mapArray, currentNode))
+                {
+                    if (distanceFromStart.ContainsKey(neighbour) && distanceFromStart[neighbour] < minDistance)
+                    {
+                        minDistance = distanceFromStart[neighbour];
+                        next = neighbour;
+                    }
+                }
+
+                currentNode = next;
+            }
+
+            shortestPath.Add(start);
+            shortestPath.Reverse();
+            return shortestPath;
+        }
+
+        public static List<Point> GetNeighbours(string[,] map, Point point)
+        {
+            var neighborPoints = new List<Point>();
+            var width = map.GetLength(0);
+            var height = map.GetLength(1);
+
+            foreach (var offset in new[] { new Point(-1, 0), new Point(0, -1), new Point(1, 0), new Point(0, 1) })
+            {
+                var neighbour = point.Add(offset);
+                if (neighbour.Column >= 0 && neighbour.Column < width && neighbour.Row >= 0 && neighbour.Row < height &&
+                    map[neighbour.Column, neighbour.Row] != "█")
+                {
+                    neighborPoints.Add(neighbour);
+                }
+            }
+
+            return neighborPoints;
+        }
+
+        public static void Main(string[] args)
+        {
+            var generator = new MapGenerator(new MapGeneratorOptions()
+            {
+                Height = 35,
+                Width = 90,
+                Seed = 10,
+                Noise = .1f,
+                AddTraffic = true,
+            });
+
+            string[,] mapArray = generator.Generate();
+            var visited = new List<Point>();
+
+            Console.WriteLine("Write (even; [<=88;<=34]) coordinates, please: ");
+            var startAndEnd = Console.ReadLine();
+            
+            
+
+            while (startAndEnd.Length != 0)
+            {
+                var startEnd = startAndEnd.Split(" ");
+                var column1 = Convert.ToInt32(startEnd[0]);
+                var row1 = Convert.ToInt32(startEnd[1]);
+                var column2 = Convert.ToInt32(startEnd[2]);
+                var row2 = Convert.ToInt32(startEnd[3]);
+
+                var startPoint = new Point(column1, row1);
+                var endPoint = new Point(column2, row2);
+
+                var path = GetShortestPath(mapArray, startPoint, endPoint);
+                new MapPrinter().Print(mapArray, path);
+                Console.WriteLine($"The shortest path from ({column1}, {row1}) to ({column2}, {row2}) is:");
+
+                foreach (var point in path)
+                {
+                    Console.WriteLine($"({point.Column}, {point.Row})");
+                }
+
+                Console.WriteLine("Write (even; [<=88;<=34]) coordinates, please: ");
+                startAndEnd = Console.ReadLine();
             }
         }
 
-        visit.Remove(point);
-        visited.Add(point);
-    }
-    visited.Clear();
-    var (path, distance) = distanceAndOrigin.WritePath(goal, start);
-    Console.WriteLine(distance);
-    new MapPrinter().Print(map, path);
-}
-
-List<Point> GetNeighbours(Point point)
-{
-    var neighbours = new List<Point>();
-    if (point.Row > 0 && map[point.Column, point.Row - 1] != "█")
-    {
-        neighbours.Add(new Point(point.Column, point.Row - 1));
-    }
-    if (point.Row < height - 1 && map[point.Column, point.Row + 1] != "█")
-    {
-        neighbours.Add(new Point(point.Column, point.Row + 1));
-    }
-    if (point.Column > 0 && map[point.Column - 1, point.Row] != "█")
-    {
-        neighbours.Add(new Point(point.Column - 1, point.Row));
-    }
-    if (point.Column < width - 1 && map[point.Column + 1, point.Row] != "█")
-    {
-        neighbours.Add(new Point(point.Column + 1, point.Row));
-    }
-    //if (point is { Row: > 0, Column: > 0 }) neighbours.Add(new Point(point.Column - 1, point.Row - 1));
-    //if (point is { Row: > 0, Column: < width }) neighbours.Add(new Point(point.Column + 1, point.Row - 1));
-    //if (point is { Row: < height, Column: > 0 }) neighbours.Add(new Point(point.Column - 1, point.Row + 1));
-    //if (point is { Row: < height, Column: < width }) neighbours.Add(new Point(point.Column + 1, point.Row + 1));
-    return neighbours;
-}
-
-public class GetMaxStructure
-{
-    private Dictionary<Point, (int, Point)> _points = new Dictionary<Point, (int, Point)>();
-
-    public void Add(Point element, int distance, Point origin)
-    {
-        if (!_points.ContainsKey(element) || _points[element].Item1 > distance) _points[element] = (distance, origin);
-    }
-
-    public (Point, int) GetElement(List<Point> toVisit)
-    {
-        if (_points.Count == 1)
-        {
-            return (_points.Keys.First(), _points.Values.First().Item1);
-        }
-
-        var min = toVisit[0];
-        var minNum = _points[toVisit[0]].Item1;
-        foreach (var point in toVisit)
-        {
-            if (_points[point].Item1 < minNum)
-            {
-                min = point;
-                minNum = _points[point].Item1;
-            }
-        }
-
-        return (min, _points[min].Item1);
-    }
-
-    public (List<Point>, int) WritePath(Point endPoint, Point start)
-    {
-        var points = new List<Point>();
-        var distance = _points[endPoint].Item1;
-        while (true)
-        {
-            points.Add(endPoint);
-            if (Equals(start, endPoint))
-            {
-                points.Reverse();
-                return (points, distance);
-            }
-            endPoint = _points[endPoint].Item2;
-        }
     }
 }
