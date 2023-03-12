@@ -10,5 +10,9 @@
             Column = column;
             Row = row;
         }
+        public Point Add(Point other)
+        {
+            return new Point(Column + other.Column, Row + other.Row);
+        }
     }
 }
