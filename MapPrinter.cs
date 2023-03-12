@@ -5,27 +5,27 @@
 
     public class MapPrinter
     {
-        public void Print(string[,] maze, List<Point> path)
+        public void Print(string[,] maze, List<Point> shortestPath)
         {
-            var star = false;
+            maze[shortestPath[0].Column, shortestPath[0].Row] = "A";
+            maze[shortestPath[^1].Column, shortestPath[^1].Row] = "B";
+            for (int i = 2; i < shortestPath.Count - 1; i++)
+            {
+                maze[shortestPath[i].Column, shortestPath[i].Row] = "•";
+            }
+
             PrintTopLine();
             for (var row = 0; row < maze.GetLength(1); row++)
             {
                 Console.Write($"{row}\t");
                 for (var column = 0; column < maze.GetLength(0); column++)
                 {
-                    foreach (var step in path)
-                    {
-                        if (step.Row == row && step.Column == column) star = true;
-                    }
-
-                    Console.Write(star ? "*" : maze[column, row]);
-
-                    star = false;
+                    Console.Write(maze[column, row]);
                 }
 
                 Console.WriteLine();
             }
+        
 
             void PrintTopLine()
             {
