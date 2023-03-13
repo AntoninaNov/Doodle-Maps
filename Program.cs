@@ -13,9 +13,11 @@ namespace Kse.Algorithms.Samples
 
             var priorityQueue = new PriorityQueue<Point, int>();
             priorityQueue.Enqueue(start, 0);
+            var LookNodesNeighbours = 0;
 
             while (priorityQueue.Count != 0)
             {
+                LookNodesNeighbours++;
                 var current = priorityQueue.Dequeue();
                 if (current.Equals(goal))
                 {
@@ -36,6 +38,7 @@ namespace Kse.Algorithms.Samples
                     }
                 }
             }
+            Console.WriteLine($"Dijkstra algorithm have checked {LookNodesNeighbours} nodes.");
 
             var currentNode = goal;
             while (!currentNode.Equals(start))
@@ -110,8 +113,10 @@ namespace Kse.Algorithms.Samples
                 var startPoint = new Point(column1, row1);
                 var endPoint = new Point(column2, row2);
 
-                var path = AStarAlgorithm(mapArray, startPoint, endPoint);
-                new MapPrinter().Print(mapArray, path);
+                var path1 = DijkstraAlgorithm(mapArray, startPoint, endPoint);
+                var path2 = AStarAlgorithm(mapArray, startPoint, endPoint);
+                new MapPrinter().Print(mapArray, path1);
+                new MapPrinter().Print(mapArray, path2);
                 /*
                 Console.WriteLine($"The shortest path from ({column1}, {row1}) to ({column2}, {row2}) is:");
                 
@@ -138,8 +143,10 @@ namespace Kse.Algorithms.Samples
             var priorityQueue = new PriorityQueue<Point, int>();
             priorityQueue.Enqueue(start, distanceStartEnd[start].Item1 + distanceStartEnd[start].Item2);
 
+            var LookNodesNeighbours = 0;
             while (priorityQueue.Count != 0)
             {
+                LookNodesNeighbours++;
                 var current = priorityQueue.Dequeue();
                 if (current.Equals(goal))
                 {
@@ -160,6 +167,7 @@ namespace Kse.Algorithms.Samples
                     }
                 }
             }
+            Console.WriteLine($"A* algorithm have checked {LookNodesNeighbours} nodes.");
 
             var currentNode = goal;
             var totalTime = .0;
@@ -171,7 +179,7 @@ namespace Kse.Algorithms.Samples
                 if (Equals(start, currentNode))
                 {
                     shortestPath.Reverse();
-                    Console.WriteLine($"Total time: {totalTime} hours (assuming each cell is 1 km)");
+                    Console.WriteLine($"Total time: {totalTime} hours (assuming each cell is 1 km).");
                     return shortestPath;
                 }
                 currentNode = distanceStartEnd[currentNode].Item3;
