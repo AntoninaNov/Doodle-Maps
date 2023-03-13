@@ -2,9 +2,9 @@
 
 namespace Kse.Algorithms.Samples
 {
-    public class DijkstraAlgorithm
+    public class Algorithms
     {
-        public static List<Point> GetShortestPath(string[,] mapArray, Point start, Point goal)
+        public static List<Point> DijkstraAlgorithm(string[,] mapArray, Point start, Point goal)
         {
             var shortestPath = new List<Point>();
 
@@ -154,7 +154,7 @@ namespace Kse.Algorithms.Samples
                     if (!distanceStartEnd.ContainsKey(next) || newDistance < distanceStartEnd[next].Item1)
                     {
                         distanceStartEnd[next] = (newDistance, int.Abs(next.Column - properColumn) + int.Abs(next.Row - properRow), current);
-                        var priority = distanceStartEnd[start].Item1 + distanceStartEnd[start].Item2;
+                        var priority = distanceStartEnd[next].Item1 + distanceStartEnd[next].Item2;
                         priorityQueue.Enqueue(next, priority);
                     }
                 }
