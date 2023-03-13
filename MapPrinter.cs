@@ -9,9 +9,9 @@
         {
             maze[shortestPath[0].Column, shortestPath[0].Row] = "A";
             maze[shortestPath[^1].Column, shortestPath[^1].Row] = "B";
-            for (int i = 2; i < shortestPath.Count - 1; i++)
+            for (int i = 1; i < shortestPath.Count - 1; i++)
             {
-                maze[shortestPath[i].Column, shortestPath[i].Row] = "•";
+                maze[shortestPath[i].Column, shortestPath[i].Row] = "-";
             }
 
             PrintTopLine();

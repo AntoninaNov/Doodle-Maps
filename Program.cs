@@ -7,7 +7,6 @@ namespace Kse.Algorithms.Samples
         public static List<Point> GetShortestPath(string[,] mapArray, Point start, Point goal)
         {
             var shortestPath = new List<Point>();
-            shortestPath.Add(start);
 
             var distanceFromStart = new Dictionary<Point, int>();
             distanceFromStart[start] = 0;
@@ -111,7 +110,7 @@ namespace Kse.Algorithms.Samples
                 var startPoint = new Point(column1, row1);
                 var endPoint = new Point(column2, row2);
 
-                var path = GetShortestPath(mapArray, startPoint, endPoint);
+                var path = AStarAlgorithm(mapArray, startPoint, endPoint);
                 new MapPrinter().Print(mapArray, path);
                 Console.WriteLine($"The shortest path from ({column1}, {row1}) to ({column2}, {row2}) is:");
 
@@ -122,6 +121,56 @@ namespace Kse.Algorithms.Samples
 
                 Console.WriteLine("Write (even; [<=88;<=34]) coordinates, please: ");
                 startAndEnd = Console.ReadLine();
+                mapArray = generator.Generate();
+            }
+        }
+        
+        public static List<Point> AStarAlgorithm(string[,] mapArray, Point start, Point goal)
+        {
+            var shortestPath = new List<Point>();
+            var properColumn = goal.Column;
+            var properRow = goal.Row;
+
+            var distanceStartEnd = new Dictionary<Point, (int, int, Point)>();
+            distanceStartEnd[start] = (0, int.Abs(start.Column - properColumn) + int.Abs(start.Row - properRow), start);
+
+            var priorityQueue = new PriorityQueue<Point, int>();
+            priorityQueue.Enqueue(start, distanceStartEnd[start].Item1 + distanceStartEnd[start].Item2);
+
+            while (priorityQueue.Count != 0)
+            {
+                var current = priorityQueue.Dequeue();
+                if (current.Equals(goal))
+                {
+                    break;
+                }
+
+                var neighborPoints = GetNeighbours(mapArray, current);
+                foreach (var next in neighborPoints)
+                {
+                    var n = int.Parse(mapArray[next.Column, next.Row]);
+                    var newDistance = distanceStartEnd[current].Item1 + n;
+
+                    if (!distanceStartEnd.ContainsKey(next) || newDistance < distanceStartEnd[next].Item1)
+                    {
+                        distanceStartEnd[next] = (newDistance, int.Abs(next.Column - properColumn) + int.Abs(next.Row - properRow), current);
+                        var priority = distanceStartEnd[start].Item1 + distanceStartEnd[start].Item2;
+                        priorityQueue.Enqueue(next, priority);
+                    }
+                }
+            }
+
+            var currentNode = goal;
+            //var distance = distanceStartEnd[goal].Item1 + distanceStartEnd[goal].Item2;
+            while (true)
+            {
+                shortestPath.Add(currentNode);
+                if (Equals(start, currentNode))
+                {
+                    shortestPath.Reverse();
+                    return shortestPath;
+                }
+                currentNode = distanceStartEnd[currentNode].Item3;
             }
         }
 
