@@ -112,13 +112,14 @@ namespace Kse.Algorithms.Samples
 
                 var path = AStarAlgorithm(mapArray, startPoint, endPoint);
                 new MapPrinter().Print(mapArray, path);
+                /*
                 Console.WriteLine($"The shortest path from ({column1}, {row1}) to ({column2}, {row2}) is:");
-
+                
                 foreach (var point in path)
                 {
                     Console.WriteLine($"({point.Column}, {point.Row})");
                 }
-
+                */
                 Console.WriteLine("Write (even; [<=88;<=34]) coordinates, please: ");
                 startAndEnd = Console.ReadLine();
                 mapArray = generator.Generate();
@@ -161,13 +162,16 @@ namespace Kse.Algorithms.Samples
             }
 
             var currentNode = goal;
-            //var distance = distanceStartEnd[goal].Item1 + distanceStartEnd[goal].Item2;
+            var totalTime = .0;
             while (true)
             {
                 shortestPath.Add(currentNode);
+                totalTime +=
+                    1 / (6 * (11 - Convert.ToDouble(int.Parse(mapArray[currentNode.Column, currentNode.Row]))));
                 if (Equals(start, currentNode))
                 {
                     shortestPath.Reverse();
+                    Console.WriteLine($"Total time: {totalTime} hours (assuming each cell is 1 km)");
                     return shortestPath;
                 }
                 currentNode = distanceStartEnd[currentNode].Item3;
